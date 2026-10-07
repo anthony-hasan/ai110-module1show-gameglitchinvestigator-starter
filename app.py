@@ -1,13 +1,15 @@
 import random
 import streamlit as st
 
+# FIXME: Logic breaks here
 def get_range_for_difficulty(difficulty: str):
     if difficulty == "Easy":
         return 1, 20
     if difficulty == "Normal":
         return 1, 100
     if difficulty == "Hard":
-        return 1, 50
+        # FIX: Hard was 1-50 (easier than Normal); widened to 1-200 so it's actually harder.
+        return 1, 200
     return 1, 100
 
 
@@ -28,23 +30,23 @@ def parse_guess(raw: str):
 
     return True, value, None
 
-
+# FIXME: Logic breaks here
 def check_guess(guess, secret):
     if guess == secret:
         return "Win", "🎉 Correct!"
 
     try:
         if guess > secret:
-            return "Too High", "📈 Go HIGHER!"
+            return "Too High", "📉 Go LOWER!"
         else:
-            return "Too Low", "📉 Go LOWER!"
+            return "Too Low", "📈 Go HIGHER!"
     except TypeError:
-        g = str(guess)
-        if g == secret:
+        g, s = int(guess), int(secret)
+        if g == s:
             return "Win", "🎉 Correct!"
-        if g > secret:
-            return "Too High", "📈 Go HIGHER!"
-        return "Too Low", "📉 Go LOWER!"
+        if g > s:
+            return "Too High", "📉 Go LOWER!"
+        return "Too Low", "📈 Go HIGHER!"
 
 
 def update_score(current_score: int, outcome: str, attempt_number: int):
@@ -106,8 +108,9 @@ if "history" not in st.session_state:
 
 st.subheader("Make a guess")
 
+# FIX: Message was hardcoded to 1-100; now uses the range for the selected difficulty.
 st.info(
-    f"Guess a number between 1 and 100. "
+    f"Guess a number between {low} and {high}. "
     f"Attempts left: {attempt_limit - st.session_state.attempts}"
 )
 
